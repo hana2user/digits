@@ -3,14 +3,15 @@
 
 <head>
   <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <link rel="stylesheet" href="style.css">
   <title>MNIST Predictor</title>
   <script src="https://cdn.jsdelivr.net/npm/@tensorflow/tfjs@4.12.0"></script>
 </head>
 
 <body>
   <h2>Digit Prediction</h2>
-  <canvas id="canvas" width="280" height="280" style="border:1px solid black;"></canvas>
-  <canvas id="preview" width="28" height="28" style="border:1px solid gray; margin-left:20px;"></canvas>
+  <canvas id="canvas" width="280" height="280"></canvas>
   <br>
   <button id="predictBtn">Predict</button>
   <button id="clearBtn">Clear</button>
@@ -18,7 +19,7 @@
 
   <script type="module">
     import { clearCanvas, predict } from './mnist.js';
-    
+
     document.getElementById('predictBtn').addEventListener('click', predict);
     document.getElementById('clearBtn').addEventListener('click', clearCanvas);    
   </script>

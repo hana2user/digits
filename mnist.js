@@ -16,20 +16,6 @@ export async function predict() {
             .div(255.0)
     ).expandDims(0);
 
-    const data = await img.data();
-
-    const previewCanvas = document.getElementById('preview');
-    const previewCtx = previewCanvas.getContext('2d');
-    const imageData = new ImageData(28, 28);
-    for (let i = 0; i < 28 * 28; i++) {
-        const val = data[i] * 255;
-        imageData.data[i * 4 + 0] = val;
-        imageData.data[i * 4 + 1] = val;
-        imageData.data[i * 4 + 2] = val;
-        imageData.data[i * 4 + 3] = 255;
-    }
-    previewCtx.putImageData(imageData, 0, 0);
-
     const prediction = model.predict(img);
     const result = prediction.argMax(1).dataSync()[0];
     document.getElementById('result').innerText = "Predicted: " + result;
@@ -55,15 +41,15 @@ window.addEventListener('DOMContentLoaded', () => {
 
     canvas.addEventListener("mousedown", (e) => {
         drawing = true;
-        const rect = canvas.getBoundingClientRect();
         ctx.beginPath();
-        ctx.moveTo(e.clientX - rect.left, e.clientY - rect.top);
+        const pos = getCanvasCoordinates(e, canvas);
+        ctx.moveTo(pos.x, pos.y);
     });
 
     canvas.addEventListener("mousemove", (e) => {
         if (!drawing) return;
-        const rect = canvas.getBoundingClientRect();
-        ctx.lineTo(e.clientX - rect.left, e.clientY - rect.top);
+        const pos = getCanvasCoordinates(e, canvas);
+        ctx.lineTo(pos.x, pos.y);
         ctx.stroke();
     });
 
@@ -71,5 +57,41 @@ window.addEventListener('DOMContentLoaded', () => {
         drawing = false;
     });
 
+    canvas.addEventListener("touchstart", (e) => {
+        e.preventDefault();
+        drawing = true;
+        const touch = e.touches[0];
+        const pos = getCanvasCoordinates(touch, canvas);
+        ctx.beginPath();
+        ctx.moveTo(pos.x, pos.y);
+      }, { passive: false });
+      
+      canvas.addEventListener("touchmove", (e) => {
+        e.preventDefault();
+        if (!drawing) return;
+        const touch = e.touches[0];
+        const pos = getCanvasCoordinates(touch, canvas);
+        ctx.lineTo(pos.x, pos.y);
+        ctx.stroke();
+      }, { passive: false });
+    
+    canvas.addEventListener("touchend", () => {
+        drawing = false;
+    });
+
+    canvas.addEventListener("touchstart", (e) => e.preventDefault(), { passive: false });
+    canvas.addEventListener("touchmove", (e) => e.preventDefault(), { passive: false });
+
     loadModel();
 });
+
+function getCanvasCoordinates(e, canvas) {
+    const rect = canvas.getBoundingClientRect();
+    const scaleX = canvas.width / rect.width;
+    const scaleY = canvas.height / rect.height;
+  
+    return {
+      x: (e.clientX - rect.left) * scaleX,
+      y: (e.clientY - rect.top) * scaleY
+    };
+  }
